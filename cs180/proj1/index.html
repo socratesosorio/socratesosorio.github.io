@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 1 - Images of the Russian Empire: Colorizing the Prokudin-Gorskii Collection</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- MathJax for LaTeX formula rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-palette"></i>
+                <span>CS180 Project 1</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#overview" class="nav-link">Overview</a></li>
+                <li><a href="#approach" class="nav-link">Approach</a></li>
+                <li><a href="#results" class="nav-link">Results</a></li>
+                <li><a href="#examples" class="nav-link">Examples</a></li>
+                <li><a href="#edge-detection" class="nav-link">Edge Detection</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="gradient-overlay"></div>
+        <div class="hero-content">
+            <div class="berkeley-badge">
+                <i class="fas fa-university"></i>
+                UC Berkeley CS180
+            </div>
+            <h1 class="hero-title">
+                Images of the <span class="highlight">Russian Empire</span>
+            </h1>
+            <p class="hero-subtitle">
+                Colorizing the Prokudin-Gorskii Photo Collection using Advanced Image Alignment
+            </p>
+            <div class="hero-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Fall 2025</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-user"></i>
+                    <span>Socrates Osorio</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-images"></i>
+                    <span>17 Colorized Images</span>
+                </div>
+            </div>
+            <a href="#overview" class="cta-button">
+                <span>Explore Results</span>
+                <i class="fas fa-arrow-down"></i>
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-dot"></div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section id="overview" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Project Overview</h2>
+                <p class="section-subtitle">
+                    Automatically producing color images from Sergei Prokudin-Gorskii's historical glass plate negatives
+                </p>
+            </div>
+            
+            <div class="overview-content">
+                <div class="overview-text">
+                    <h3>Background</h3>
+                    <p>
+                        Sergei Mikhailovich Prokudin-Gorskii (1863-1944) was a pioneering photographer who captured the Russian Empire in color by taking three separate exposures through red, green, and blue filters. This project uses computational photography techniques to automatically align these separate channel images and produce stunning colorized photographs.
+                    </p>
+                    
+                    <h3>Challenge</h3>
+                    <p>
+                        The main challenge lies in precisely aligning the three color channels, as slight camera movements between exposures can cause misalignment artifacts. For high-resolution images, this requires efficient algorithms that can handle large search spaces while maintaining accuracy.
+                    </p>
+                    
+                    <div class="overview-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">14</div>
+                            <div class="stat-label">Example Images</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Extra Images</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="overview-visual">
+                    <div class="camera-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Approach Section -->
+    <section id="approach" class="section alt">
+        <div class="container">
+            <div class="part-header">
+                <div class="part-number">01</div>
+                <div class="part-info">
+                    <h2 class="part-title">Technical Approach</h2>
+                    <p class="part-description">Implementation of single-scale and multi-scale pyramid alignment algorithms</p>
+                </div>
+            </div>
+            
+            <div class="part-content">
+                <div class="method-explanation">
+                    <h3>Step 1: Image Preprocessing and Channel Separation</h3>
+                    <div class="detailed-explanation">
+                        <p>
+                            Each Prokudin-Gorskii glass plate contains three exposures stacked vertically: Blue (top), Green (middle), and Red (bottom). My first step involves careful preprocessing to ensure optimal alignment conditions.
+                        </p>
+                    </div>
+                    <div class="method-steps">
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Channel Extraction</h4>
+                                <p>Divide the image into three equal vertical sections. Convert to float64 [0,1] range and handle different bit depths (uint8 for .jpg, uint16 for .tif files)</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-crop"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Border Cropping</h4>
+                                <p>Remove 10% borders from each channel to eliminate edge artifacts and focus alignment on central image content with reliable features</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="method-explanation">
+                    <h3>Step 2: Single-Scale Alignment (Small Images)</h3>
+                    <div class="detailed-explanation">
+                        <p>
+                            For smaller images (≤300x300 pixels), I use exhaustive search over a displacement window. This brute-force approach is computationally feasible for small images and guarantees finding the optimal alignment within the search space.
+                        </p>
+                    </div>
+                    <div class="method-steps">
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Exhaustive Search</h4>
+                                <p>Test all integer displacements (dx, dy) in range [-15, 15] pixels. For each displacement, compute overlap regions and calculate similarity metric</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>NCC Computation</h4>
+                                <p>Normalize both image patches to zero mean and unit variance, then compute dot product. This handles brightness/contrast differences between channels</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Optimal Selection</h4>
+                                <p>Choose displacement yielding highest NCC score. Apply np.roll() to shift Green and Red channels relative to Blue reference</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="method-explanation">
+                    <h3>Step 3: Multi-Scale Pyramid Alignment (Large Images)</h3>
+                    <div class="detailed-explanation">
+                        <p>
+                            For high-resolution .tif images (up to 3000+ pixels), exhaustive search becomes prohibitively expensive. My pyramid approach reduces computational complexity from O(n²) to O(log n) while maintaining alignment accuracy through coarse-to-fine refinement.
+                        </p>
+                    </div>
+                    <div class="method-steps">
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Pyramid Construction</h4>
+                                <p>Build 5-level pyramid by iterative 2x downsampling. Level 0 = original, Level 4 = smallest (64x64 minimum size). Use simple decimation: I[k+1](i,j) = I[k](2i, 2j)</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Coarse-to-Fine Search</h4>
+                                <p>Start at coarsest level with ±10 pixel search. At each finer level, scale previous displacement by 2x and search ±3-8 pixels around estimate</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Displacement Propagation</h4>
+                                <p>Propagate and refine alignment estimate through pyramid levels. Final displacement at full resolution typically accurate to sub-pixel precision</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="method-explanation">
+                    <h3>Step 4: Robust Overlap Region Computation</h3>
+                    <div class="detailed-explanation">
+                        <p>
+                            Critical to alignment accuracy is computing the correct overlap regions after applying displacement. I implemented careful bounds checking to handle edge cases and ensure valid comparisons.
+                        </p>
+                    </div>
+                    <div class="method-steps">
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-vector-square"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Overlap Calculation</h4>
+                                <p>For displacement (dx, dy), compute valid regions: x1_start = max(0, dx), x1_end = min(w, w+dx). Similar for y-coordinates and second image</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Validation</h4>
+                                <p>Skip displacements yielding empty overlap regions. Ensures NCC computation always operates on valid, comparable image patches</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="method-explanation">
+                    <h3>Step 5: Final Image Assembly and Post-Processing</h3>
+                    <div class="detailed-explanation">
+                        <p>
+                            After computing optimal displacements, I apply the transformations and perform automatic cleanup to produce publication-quality results.
+                        </p>
+                    </div>
+                    <div class="method-steps">
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>RGB Assembly</h4>
+                                <p>Stack aligned channels into RGB image: np.dstack([r_aligned, g_aligned, b_reference]). Blue channel serves as fixed reference frame</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-crop-alt"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Auto-Cropping</h4>
+                                <p>Detect and remove misaligned borders by analyzing pixel intensities. Crop regions with mean values near 0 or 1 (black/white artifacts)</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-save"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Output Generation</h4>
+                                <p>Clip values to [0,1], convert to uint8, and save as JPEG. Print displacement vectors for documentation and analysis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="method-explanation">
+                    <h3>Algorithm Strategy and Optimization</h3>
+                    <div class="detailed-explanation">
+                        <p>
+                            My implementation incorporates several key optimizations and strategic decisions based on the specific challenges of the Prokudin-Gorskii collection. The algorithm automatically adapts its approach based on image characteristics.
+                        </p>
+                    </div>
+                    <div class="method-steps">
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Adaptive Strategy Selection</h4>
+                                <p>Automatically choose single-scale vs. pyramid based on image size threshold (300x300). Use edge detection for problematic images like Emir where channels have vastly different intensities</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Performance Optimization</h4>
+                                <p>Vectorized NumPy operations, reduced search ranges at finer pyramid levels (±10 → ±8 → ±3), and efficient memory management for large images</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="step-content">
+                                <h4>Robustness Measures</h4>
+                                <p>Handle edge cases with empty overlaps, normalize images for different bit depths, crop borders to avoid alignment on image artifacts, and validate all intermediate results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-detail">
+                    <h3>Mathematical Formulations</h3>
+                    
+                    <div class="algorithm-box">
+                        <h4>Normalized Cross-Correlation (NCC)</h4>
+                        <div class="formula">
+                            $$\text{NCC}(\mathbf{I_1}, \mathbf{I_2}) = \frac{\sum_{i,j} \hat{I_1}(i,j) \cdot \hat{I_2}(i,j)}{\sqrt{\sum_{i,j} \hat{I_1}(i,j)^2} \cdot \sqrt{\sum_{i,j} \hat{I_2}(i,j)^2}}$$
+                        </div>
+                        <div class="formula">
+                            <p>Where: $\hat{I}(i,j) = \frac{I(i,j) - \mu_I}{\sigma_I}$ (normalized pixel intensities)</p>
+                        </div>
+                        <p class="algorithm-description">
+                            NCC provides robust alignment by normalizing images to zero mean and unit variance, then computing their dot product. This metric is invariant to linear brightness and contrast differences between color channels.
+                        </p>
+                    </div>
+
+                    <div class="algorithm-box">
+                        <h4>Image Pyramid Downsampling</h4>
+                        <div class="formula">
+                            $$I^{(k+1)}(i,j) = I^{(k)}(2i, 2j)$$
+                        </div>
+                        <p class="algorithm-description">
+                            Each pyramid level reduces image dimensions by factor of 2, enabling efficient coarse-to-fine alignment.
+                        </p>
+                    </div>
+
+                    <div class="algorithm-box">
+                        <h4>Sobel Edge Detection</h4>
+                        <div class="formula">
+                            $$G_x = \begin{bmatrix} -1 & 0 & 1 \\ -2 & 0 & 2 \\ -1 & 0 & 1 \end{bmatrix} * I, \quad G_y = \begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ 1 & 2 & 1 \end{bmatrix} * I$$
+                        </div>
+                        <div class="formula">
+                            $$|\nabla I| = \sqrt{G_x^2 + G_y^2}$$
+                        </div>
+                        <p class="algorithm-description">
+                            Edge magnitude computation for structure-based alignment when pixel intensities vary significantly across channels.
+                        </p>
+                    </div>
+
+                    <div class="algorithm-box">
+                        <h4>Displacement Search</h4>
+                        <div class="formula">
+                            $$(\Delta x^*, \Delta y^*) = \arg\max_{(\Delta x, \Delta y) \in S} \text{NCC}(I_{\text{ref}}, T_{\Delta x, \Delta y}(I_{\text{target}}))$$
+                        </div>
+                        <p class="algorithm-description">
+                            Exhaustive search over displacement window $S = [-15, 15] \times [-15, 15]$ pixels for single-scale alignment.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" class="section">
+        <div class="container">
+            <div class="part-header">
+                <div class="part-number">02</div>
+                <div class="part-info">
+                    <h2 class="part-title">Alignment Results</h2>
+                    <p class="part-description">Successful colorization of all provided example images</p>
+                </div>
+            </div>
+            
+            <div class="part-content">
+                <div class="results-container">
+                    <h3>Example Images from the Prokudin-Gorskii Collection</h3>
+                    <div class="results-grid">
+                        <!-- Cathedral -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/cathedral_colorized.jpg" alt="Cathedral Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Cathedral<br><span class="displacement">G: (2, 5), R: (3, 12)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Monastery -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/monastery_colorized.jpg" alt="Monastery Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Monastery<br><span class="displacement">G: (2, -3), R: (2, 3)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tobolsk -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/tobolsk_colorized.jpg" alt="Tobolsk Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Tobolsk<br><span class="displacement">G: (3, 3), R: (3, 6)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Church -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/church_colorized.jpg" alt="Church Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Church<br><span class="displacement">G: (4, 25), R: (-4, 58)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Emir -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/emir_edges_colorized.jpg" alt="Emir Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Emir of Bukhara<br><span class="displacement">G: (24, 49), R: (40, 107)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Harvesters -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/harvesters_colorized.jpg" alt="Harvesters Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Harvesters<br><span class="displacement">G: (17, 59), R: (14, 124)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Icon -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/icon_colorized.jpg" alt="Icon Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Icon<br><span class="displacement">G: (17, 41), R: (23, 89)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lady -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/italil_colorized.jpg" alt="Lady Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Italil<br><span class="displacement">G: (21, 38), R: (35, 77)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Self Portrait -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/self_portrait_colorized.jpg" alt="Self Portrait Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Self Portrait<br><span class="displacement">G: (29, 79), R: (37, 176)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Three Generations -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/three_generations_colorized.jpg" alt="Three Generations Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Three Generations<br><span class="displacement">G: (14, 52), R: (11, 111)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Melons -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/melons_colorized.jpg" alt="Melons Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Melons<br><span class="displacement">G: (11, 82), R: (14, 179)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Train -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/lastochikino_colorized.jpg" alt="Train Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Lastochikino<br><span class="displacement">G: (-2, -3), R: (-9, 75)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lugano -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/lugano_colorized.jpg" alt="Lugano Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Lugano<br><span class="displacement">G: (-16, 41), R: (-29, 93)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Siren -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/siren_colorized.jpg" alt="Siren Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Siren<br><span class="displacement">G: (-6, 49), R: (-25, 96)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Examples Section -->
+    <section id="examples" class="section alt">
+        <div class="container">
+            <div class="part-header">
+                <div class="part-number">03</div>
+                <div class="part-info">
+                    <h2 class="part-title">Additional Examples</h2>
+                    <p class="part-description">Extra images from the Prokudin-Gorskii collection demonstrating algorithm versatility</p>
+                </div>
+            </div>
+            
+            <div class="part-content">
+                <div class="results-container">
+                    <h3>My Selected Examples</h3>
+                    <div class="results-grid extra-grid">
+                        <!-- Camel -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/camel_colorized.jpg" alt="Camel Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Camel<br><span class="displacement">G: (-3, 46), R: (-20, 97)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Child -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/child_colorized.jpg" alt="Child Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Child<br><span class="displacement">G: (-13, 45), R: (-11, 103)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lake -->
+                        <div class="result-item">
+                            <div class="image-container">
+                                <img src="assets/lake_colorized.jpg" alt="Lake Colorized" class="project-image">
+                                <div class="image-caption">
+                                    <p>Lake<br><span class="displacement">G: (-28, 17), R: (-63, 49)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Edge Detection Implementation Section -->
+    <section id="edge-detection" class="section">
+        <div class="container">
+            <div class="part-header">
+                <div class="part-number">04</div>
+                <div class="part-info">
+                    <h2 class="part-title">Edge Detection Implementation</h2>
+                    <p class="part-description">Advanced structural alignment for challenging images with varying brightness</p>
+                </div>
+            </div>
+            
+            <div class="part-content">
+                <div class="comprehensive-explanation">
+                    <h3>Edge-Based Alignment Methodology</h3>
+                    
+                    <p>
+                        Traditional pixel-based alignment methods like Normalized Cross-Correlation rely on the assumption that corresponding regions across color channels have similar intensity patterns. However, this assumption breaks down for certain images in the Prokudin-Gorskii collection, most notably the Emir of Bukhara photograph. In this image, the subject's dark clothing appears dramatically different across the red, green, and blue exposures - what appears dark in one channel may appear bright in another due to the spectral properties of the materials and the filtering process used in the original photography.
+                    </p>
+
+                    <h4>The Challenge with Intensity-Based Metrics</h4>
+                    <p>
+                        When I initially applied standard NCC alignment to the Emir image, the algorithm struggled because it was attempting to correlate pixel intensities that had fundamentally different brightness characteristics. The dark robes that appear nearly black in one channel might appear gray or even bright in another channel, depending on how the fabric's spectral reflectance interacted with each color filter. This created a situation where the highest NCC scores occurred at incorrect displacement values, leading to misaligned facial features and clothing details.
+                    </p>
+
+                    <p>
+                        The core insight that led to my edge detection solution is that while absolute pixel intensities vary dramatically between channels, the structural boundaries and edges within the image remain consistent. A person's face has the same outline regardless of which color filter was used to capture it. Similarly, the boundaries between different objects, clothing elements, and background features maintain their spatial relationships across all three color channels.
+                    </p>
+
+                    <h4>Sobel Edge Detection Implementation</h4>
+                    <p>
+                        I implemented edge detection using the Sobel operator, a well-established technique for extracting structural information from images. The Sobel method works by computing the gradient magnitude at each pixel, effectively highlighting regions where intensity changes rapidly - precisely the structural boundaries that remain consistent across color channels.
+                    </p>
+
+                    <p>
+                        For computational efficiency, especially important when processing large .tif images through the pyramid alignment algorithm, I implemented a streamlined version of Sobel edge detection. Rather than using full convolution with the standard Sobel kernels, I compute gradients using simple finite differences: grad_x[1:-1, 1:-1] = (image[1:-1, 2:] - image[1:-1, :-2]) / 2.0 and grad_y[1:-1, 1:-1] = (image[2:, 1:-1] - image[:-2, 1:-1]) / 2.0.
+                    </p>
+
+                    <div class="results-container">
+                        <h3>Emir Comparison: Standard vs Edge-Based Alignment</h3>
+                        <div class="image-comparison">
+                            <div class="image-container comparison">
+                                <img src="assets/emir_colorized.jpg" alt="Emir Standard Alignment" class="project-image">
+                                <div class="image-caption">
+                                    <p  style="color: white;">Standard NCC Alignment - G: (24, 49), R: (64, 95)<br><span class="image-note" style="color: white;">Sufficient but not optimal</span></p>
+                                </div>
+                            </div>
+                            <div class="vs-divider">
+                                <span>VS</span>
+                            </div>
+                            <div class="image-container comparison">
+                                <img src="assets/emir_edges_colorized.jpg" alt="Emir Edge-Based Alignment" class="project-image">
+                                <div class="image-caption">
+                                    <p style="color: white;">Edge-Based Alignment - G: (24, 49), R: (40, 107)<br><span class="image-note" style="color: white;">Superior structural alignment</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <h3>CS180 Project 1</h3>
+                    <p>Images of the Russian Empire: Colorizing the Prokudin-Gorskii Collection</p>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-meta">
+                        <p>UC Berkeley • Computer Vision</p>
+                        <p>Fall 2025</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; Created with ❤️ by Socrates Osorio using advanced image processing techniques.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for image viewing -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="modalImage" class="modal-image" src="" alt="">
+            <div id="modalCaption" class="modal-caption"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
